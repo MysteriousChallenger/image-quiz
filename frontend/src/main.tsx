@@ -12,6 +12,7 @@ import { routeTree } from "./routeTree.gen"
 import { ApiError, OpenAPI } from "./client"
 import { CustomProvider } from "./components/ui/provider"
 
+// @ts-expect-error
 OpenAPI.BASE = import.meta.env.VITE_API_URL
 OpenAPI.TOKEN = async () => {
   return localStorage.getItem("access_token") || ""

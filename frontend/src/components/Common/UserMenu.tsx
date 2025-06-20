@@ -1,5 +1,5 @@
 import { Box, Button, Flex, Text } from "@chakra-ui/react"
-import { Link, redirect } from "@tanstack/react-router"
+import { Link } from "@tanstack/react-router"
 import { FaUserAstronaut } from "react-icons/fa"
 import { FiLogOut, FiUser } from "react-icons/fi"
 
