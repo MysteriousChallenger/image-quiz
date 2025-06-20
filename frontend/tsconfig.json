@@ -21,7 +21,7 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["src/**/*.ts", "tests/**/*.ts", "playwright.config.ts"],
+  "include": ["src/**/*.ts", "tests/**/*.ts", "playwright.config.ts", "src/routes/index.tsx"],
   "references": [
     {
       "path": "./tsconfig.node.json"

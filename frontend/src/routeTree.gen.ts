@@ -15,11 +15,12 @@ import { Route as SignupImport } from './routes/signup'
 import { Route as ResetPasswordImport } from './routes/reset-password'
 import { Route as RecoverPasswordImport } from './routes/recover-password'
 import { Route as LoginImport } from './routes/login'
-import { Route as LayoutImport } from './routes/_layout'
-import { Route as LayoutIndexImport } from './routes/_layout/index'
-import { Route as LayoutSettingsImport } from './routes/_layout/settings'
-import { Route as LayoutItemsImport } from './routes/_layout/items'
-import { Route as LayoutAdminImport } from './routes/_layout/admin'
+import { Route as UserImport } from './routes/_user'
+import { Route as IndexImport } from './routes/index'
+import { Route as UserIndexImport } from './routes/_user/index'
+import { Route as UserSettingsImport } from './routes/_user/settings'
+import { Route as UserItemsImport } from './routes/_user/items'
+import { Route as UserAdminImport } from './routes/_user/admin'
 
 // Create/Update Routes
 
@@ -43,37 +44,46 @@ const LoginRoute = LoginImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
-const LayoutRoute = LayoutImport.update({
-  id: '/_layout',
+const UserRoute = UserImport.update({
+  id: '/_user',
   getParentRoute: () => rootRoute,
 } as any)
 
-const LayoutIndexRoute = LayoutIndexImport.update({
+const IndexRoute = IndexImport.update({
   path: '/',
-  getParentRoute: () => LayoutRoute,
+  getParentRoute: () => rootRoute,
 } as any)
 
-const LayoutSettingsRoute = LayoutSettingsImport.update({
+const UserIndexRoute = UserIndexImport.update({
+  path: '/',
+  getParentRoute: () => UserRoute,
+} as any)
+
+const UserSettingsRoute = UserSettingsImport.update({
   path: '/settings',
-  getParentRoute: () => LayoutRoute,
+  getParentRoute: () => UserRoute,
 } as any)
 
-const LayoutItemsRoute = LayoutItemsImport.update({
+const UserItemsRoute = UserItemsImport.update({
   path: '/items',
-  getParentRoute: () => LayoutRoute,
+  getParentRoute: () => UserRoute,
 } as any)
 
-const LayoutAdminRoute = LayoutAdminImport.update({
+const UserAdminRoute = UserAdminImport.update({
   path: '/admin',
-  getParentRoute: () => LayoutRoute,
+  getParentRoute: () => UserRoute,
 } as any)
 
 // Populate the FileRoutesByPath interface
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/_layout': {
-      preLoaderRoute: typeof LayoutImport
+    '/': {
+      preLoaderRoute: typeof IndexImport
+      parentRoute: typeof rootRoute
+    }
+    '/_user': {
+      preLoaderRoute: typeof UserImport
       parentRoute: typeof rootRoute
     }
     '/login': {
@@ -92,21 +102,21 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SignupImport
       parentRoute: typeof rootRoute
     }
-    '/_layout/admin': {
-      preLoaderRoute: typeof LayoutAdminImport
-      parentRoute: typeof LayoutImport
+    '/_user/admin': {
+      preLoaderRoute: typeof UserAdminImport
+      parentRoute: typeof UserImport
     }
-    '/_layout/items': {
-      preLoaderRoute: typeof LayoutItemsImport
-      parentRoute: typeof LayoutImport
+    '/_user/items': {
+      preLoaderRoute: typeof UserItemsImport
+      parentRoute: typeof UserImport
     }
-    '/_layout/settings': {
-      preLoaderRoute: typeof LayoutSettingsImport
-      parentRoute: typeof LayoutImport
+    '/_user/settings': {
+      preLoaderRoute: typeof UserSettingsImport
+      parentRoute: typeof UserImport
     }
-    '/_layout/': {
-      preLoaderRoute: typeof LayoutIndexImport
-      parentRoute: typeof LayoutImport
+    '/_user/': {
+      preLoaderRoute: typeof UserIndexImport
+      parentRoute: typeof UserImport
     }
   }
 }
@@ -114,11 +124,12 @@ declare module '@tanstack/react-router' {
 // Create and export the route tree
 
 export const routeTree = rootRoute.addChildren([
-  LayoutRoute.addChildren([
-    LayoutAdminRoute,
-    LayoutItemsRoute,
-    LayoutSettingsRoute,
-    LayoutIndexRoute,
+  IndexRoute,
+  UserRoute.addChildren([
+    UserAdminRoute,
+    UserItemsRoute,
+    UserSettingsRoute,
+    UserIndexRoute,
   ]),
   LoginRoute,
   RecoverPasswordRoute,
