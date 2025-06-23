@@ -1,5 +1,4 @@
 import {
-  Box,
   Button,
   Container,
   EmptyState,
@@ -23,7 +22,6 @@ import {
 } from "@/components/ui/pagination.tsx";
 import { QuizActionsMenu } from "@/components/Quiz/QuizActionsMenu";
 import { FaPlus } from "react-icons/fa";
-import { useCallback } from "react";
 
 const quizSearchSchema = z.object({
   page: z.number().catch(1),
@@ -58,6 +56,7 @@ function QuizTable() {
 
   const setPage = (page: number) => {
     navigate({
+      // @ts-ignore
       search: (prev: { [key: string]: string }) => ({
         ...prev,
         page: String(page),
@@ -68,6 +67,7 @@ function QuizTable() {
   const handlePlay = (quizId: string) => {
     navigate({
       to: `${quizId}`,
+      // @ts-ignore
       search: {},
     });
   };

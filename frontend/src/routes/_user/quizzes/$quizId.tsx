@@ -1,5 +1,4 @@
-import AddItem from "@/components/Items/AddItem";
-import { Container, Heading } from "@chakra-ui/react";
+import { Container } from "@chakra-ui/react";
 import { createFileRoute } from "@tanstack/react-router";
 import PlayQuiz from "@/components/Quiz/PlayQuiz";
 
