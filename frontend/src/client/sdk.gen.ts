@@ -4,6 +4,20 @@ import type { CancelablePromise } from "./core/CancelablePromise"
 import { OpenAPI } from "./core/OpenAPI"
 import { request as __request } from "./core/request"
 import type {
+  ImageQuizzesReadQuizzesData,
+  ImageQuizzesReadQuizzesResponse,
+  ImageQuizzesCreateQuizData,
+  ImageQuizzesCreateQuizResponse,
+  ImageQuizzesReadQuizData,
+  ImageQuizzesReadQuizResponse,
+  ImageQuizzesUpdateQuizData,
+  ImageQuizzesUpdateQuizResponse,
+  ImageQuizzesDeleteQuizData,
+  ImageQuizzesDeleteQuizResponse,
+  ImageQuizzesReadQuizImageData,
+  ImageQuizzesReadQuizImageResponse,
+  ImageQuizzesCreateQuizMetadataData,
+  ImageQuizzesCreateQuizMetadataResponse,
   ItemsReadItemsData,
   ItemsReadItemsResponse,
   ItemsCreateItemData,
@@ -47,6 +61,171 @@ import type {
   UtilsTestEmailResponse,
   UtilsHealthCheckResponse,
 } from "./types.gen"
+
+export class ImageQuizzesService {
+  /**
+   * Read Quizzes
+   * @param data The data for the request.
+   * @param data.skip
+   * @param data.limit
+   * @returns ImageQuizReadList Successful Response
+   * @throws ApiError
+   */
+  public static readQuizzes(
+    data: ImageQuizzesReadQuizzesData = {},
+  ): CancelablePromise<ImageQuizzesReadQuizzesResponse> {
+    return __request(OpenAPI, {
+      method: "GET",
+      url: "/api/v1/image_quizzes/",
+      query: {
+        skip: data.skip,
+        limit: data.limit,
+      },
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+
+  /**
+   * Create Quiz
+   * Create new quiz using metadata matching the token returned from /create_metadata.
+   * @param data The data for the request.
+   * @param data.formData
+   * @returns ImageQuizRead Successful Response
+   * @throws ApiError
+   */
+  public static createQuiz(
+    data: ImageQuizzesCreateQuizData,
+  ): CancelablePromise<ImageQuizzesCreateQuizResponse> {
+    return __request(OpenAPI, {
+      method: "POST",
+      url: "/api/v1/image_quizzes/",
+      formData: data.formData,
+      mediaType: "multipart/form-data",
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+
+  /**
+   * Read Quiz
+   * Get quiz by ID.
+   * @param data The data for the request.
+   * @param data.id
+   * @returns ImageQuizRead Successful Response
+   * @throws ApiError
+   */
+  public static readQuiz(
+    data: ImageQuizzesReadQuizData,
+  ): CancelablePromise<ImageQuizzesReadQuizResponse> {
+    return __request(OpenAPI, {
+      method: "GET",
+      url: "/api/v1/image_quizzes/{id}",
+      path: {
+        id: data.id,
+      },
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+
+  /**
+   * Update Quiz
+   * Update an quiz.
+   * @param data The data for the request.
+   * @param data.id
+   * @param data.requestBody
+   * @returns ImageQuizRead Successful Response
+   * @throws ApiError
+   */
+  public static updateQuiz(
+    data: ImageQuizzesUpdateQuizData,
+  ): CancelablePromise<ImageQuizzesUpdateQuizResponse> {
+    return __request(OpenAPI, {
+      method: "PUT",
+      url: "/api/v1/image_quizzes/{id}",
+      path: {
+        id: data.id,
+      },
+      body: data.requestBody,
+      mediaType: "application/json",
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+
+  /**
+   * Delete Quiz
+   * Delete an quiz.
+   * @param data The data for the request.
+   * @param data.id
+   * @returns Message Successful Response
+   * @throws ApiError
+   */
+  public static deleteQuiz(
+    data: ImageQuizzesDeleteQuizData,
+  ): CancelablePromise<ImageQuizzesDeleteQuizResponse> {
+    return __request(OpenAPI, {
+      method: "DELETE",
+      url: "/api/v1/image_quizzes/{id}",
+      path: {
+        id: data.id,
+      },
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+
+  /**
+   * Read Quiz Image
+   * Get quiz image by ID.
+   * @param data The data for the request.
+   * @param data.id
+   * @returns unknown Successful Response
+   * @throws ApiError
+   */
+  public static readQuizImage(
+    data: ImageQuizzesReadQuizImageData,
+  ): CancelablePromise<ImageQuizzesReadQuizImageResponse> {
+    return __request(OpenAPI, {
+      method: "GET",
+      url: "/api/v1/image_quizzes/{id}/image",
+      path: {
+        id: data.id,
+      },
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+
+  /**
+   * Create Quiz Metadata
+   * Create new quiz metadata. Use returned token to create quiz.
+   * @param data The data for the request.
+   * @param data.requestBody
+   * @returns string Successful Response
+   * @throws ApiError
+   */
+  public static createQuizMetadata(
+    data: ImageQuizzesCreateQuizMetadataData,
+  ): CancelablePromise<ImageQuizzesCreateQuizMetadataResponse> {
+    return __request(OpenAPI, {
+      method: "POST",
+      url: "/api/v1/image_quizzes/create_metadata",
+      body: data.requestBody,
+      mediaType: "application/json",
+      errors: {
+        422: "Validation Error",
+      },
+    })
+  }
+}
 
 export class ItemsService {
   /**

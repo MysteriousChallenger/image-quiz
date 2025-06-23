@@ -1,3 +1,4 @@
+import uuid
 from collections.abc import Generator
 from typing import Annotated
 
@@ -29,7 +30,7 @@ TokenDep = Annotated[str, Depends(reusable_oauth2)]
 
 def get_current_user(session: SessionDep, token: TokenDep) -> User:
     try:
-        payload = jwt.decode(
+        payload = jwt.decode(  # pyright: ignore[reportUnknownMemberType]
             token, settings.SECRET_KEY, algorithms=[security.ALGORITHM]
         )
         token_data = TokenPayload(**payload)
@@ -44,6 +45,20 @@ def get_current_user(session: SessionDep, token: TokenDep) -> User:
     if not user.is_active:
         raise HTTPException(status_code=400, detail="Inactive user")
     return user
+
+
+def get_mock_user() -> User:
+    """
+    Returns a mock user for testing purposes.
+    """
+    return User(
+        email="mock@email.com",
+        is_active=True,
+        is_superuser=True,
+        full_name=None,
+        hashed_password="mockhashedpassword",
+        id=uuid.UUID("3792b5b3-a2e3-4a51-b303-64aafba74307"),
+    )
 
 
 CurrentUser = Annotated[User, Depends(get_current_user)]
