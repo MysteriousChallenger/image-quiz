@@ -36,11 +36,6 @@ function getItemsQueryOptions({ page }: { page: number }) {
   }
 }
 
-export const Route = createFileRoute("/_user/items")({
-  component: Items,
-  validateSearch: (search) => itemsSearchSchema.parse(search),
-})
-
 function ItemsTable() {
   const navigate = useNavigate({ from: Route.fullPath })
   const { page } = Route.useSearch()
@@ -142,3 +137,8 @@ function Items() {
     </Container>
   )
 }
+
+export const Route = createFileRoute("/_user/items")({
+  component: Items,
+  validateSearch: (search) => itemsSearchSchema.parse(search),
+})
