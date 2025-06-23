@@ -161,7 +161,7 @@ const QuizQuestion = ({
     return null;
   }
 
-  const [height, width] = useWindowSize();
+  const [_height, _width] = useWindowSize();
   const { position, label } = question;
   const rect = anchor.getBoundingClientRect();
   const x = position.x * rect.width;

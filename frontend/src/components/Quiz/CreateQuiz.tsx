@@ -16,17 +16,10 @@ import {
 import { LuFileUp, LuTrash, LuUpload, LuX } from "react-icons/lu";
 import { useLayoutEffect, useRef, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import {
-  ApiError,
-  Body_image_quizzes_create_quiz,
-  ImageQuizCreate,
-  ImageQuizzesCreateQuizData,
-  ImageQuizzesCreateQuizMetadataData,
-  ImageQuizzesService,
-} from "@/client";
+import { ApiError, ImageQuizCreate, ImageQuizzesService } from "@/client";
 import { handleError } from "@/utils";
 import useCustomToast from "@/hooks/useCustomToast";
-import { redirect, useNavigate } from "@tanstack/react-router";
+import { useNavigate } from "@tanstack/react-router";
 
 export function useWindowSize() {
   const [size, setSize] = useState([0, 0]);
@@ -206,7 +199,7 @@ const QuizQuestion = ({
   setQuestionLabel: (label: string) => void;
   deleteQuestion: () => void;
 }) => {
-  const [height, width] = useWindowSize();
+  const [_height, _width] = useWindowSize();
 
   const { position, label } = question;
   const rect = anchor.getBoundingClientRect();
@@ -294,6 +287,7 @@ const CreateQuizQuestions = ({ quizImage }: { quizImage: File | null }) => {
     },
     onSuccess: (data) => {
       showSuccessToast("Quiz created successfully.");
+      // @ts-expect-error
       navigate({ to: `/quizzes/${data.id}` });
     },
     onError: (err: ApiError) => {

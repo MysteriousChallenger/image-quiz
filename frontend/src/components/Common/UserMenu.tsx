@@ -1,29 +1,29 @@
-import { Box, Button, Flex, Text } from "@chakra-ui/react"
-import { Link } from "@tanstack/react-router"
-import { FaUserAstronaut } from "react-icons/fa"
-import { FiLogOut, FiUser } from "react-icons/fi"
+import { Box, Button, Flex, Text } from "@chakra-ui/react";
+import { Link } from "@tanstack/react-router";
+import { FaUserAstronaut } from "react-icons/fa";
+import { FiLogOut, FiUser } from "react-icons/fi";
 
-import useAuth from "@/hooks/useAuth"
-import { MenuContent, MenuItem, MenuRoot, MenuTrigger } from "../ui/menu"
+import useAuth from "@/hooks/useAuth";
+import { MenuContent, MenuItem, MenuRoot, MenuTrigger } from "../ui/menu";
 
 const LoginMenu = () => {
   return (
     <Flex>
       <Link to="/login">
         <Button data-testid="user-menu" variant="solid" maxW="sm" truncate>
-            <FaUserAstronaut fontSize="18" />
-            <Text>Login</Text>
+          <FaUserAstronaut fontSize="18" />
+          <Text>Login</Text>
         </Button>
       </Link>
     </Flex>
-  )
-}
+  );
+};
 
 const LogoutMenu = () => {
-  const { user, logout } = useAuth()
+  const { user, logout } = useAuth();
   const handleLogout = async () => {
-    logout()
-  }
+    logout();
+  };
 
   return (
     <>
@@ -37,7 +37,7 @@ const LogoutMenu = () => {
             </Button>
           </MenuTrigger>
           <MenuContent>
-            <Link to="settings">
+            <Link to="/settings">
               <MenuItem
                 closeOnSelect
                 value="user-settings"
@@ -64,18 +64,17 @@ const LogoutMenu = () => {
         </MenuRoot>
       </Flex>
     </>
-  )
-
-}
+  );
+};
 
 const UserMenu = () => {
-  const { user } = useAuth()
+  const { user } = useAuth();
 
   if (!user) {
-    return <LoginMenu />
+    return <LoginMenu />;
   } else {
-    return <LogoutMenu />
+    return <LogoutMenu />;
   }
-}
+};
 
-export default UserMenu
+export default UserMenu;
