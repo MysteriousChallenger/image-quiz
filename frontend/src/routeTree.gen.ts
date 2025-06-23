@@ -15,12 +15,14 @@ import { Route as SignupImport } from './routes/signup'
 import { Route as ResetPasswordImport } from './routes/reset-password'
 import { Route as RecoverPasswordImport } from './routes/recover-password'
 import { Route as LoginImport } from './routes/login'
+import { Route as CreateImport } from './routes/create'
 import { Route as UserImport } from './routes/_user'
-import { Route as IndexImport } from './routes/index'
 import { Route as UserIndexImport } from './routes/_user/index'
 import { Route as UserSettingsImport } from './routes/_user/settings'
 import { Route as UserItemsImport } from './routes/_user/items'
 import { Route as UserAdminImport } from './routes/_user/admin'
+import { Route as UserQuizzesIndexImport } from './routes/_user/quizzes/index'
+import { Route as UserQuizzesQuizIdImport } from './routes/_user/quizzes/$quizId'
 
 // Create/Update Routes
 
@@ -44,13 +46,13 @@ const LoginRoute = LoginImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
-const UserRoute = UserImport.update({
-  id: '/_user',
+const CreateRoute = CreateImport.update({
+  path: '/create',
   getParentRoute: () => rootRoute,
 } as any)
 
-const IndexRoute = IndexImport.update({
-  path: '/',
+const UserRoute = UserImport.update({
+  id: '/_user',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -74,16 +76,26 @@ const UserAdminRoute = UserAdminImport.update({
   getParentRoute: () => UserRoute,
 } as any)
 
+const UserQuizzesIndexRoute = UserQuizzesIndexImport.update({
+  path: '/quizzes/',
+  getParentRoute: () => UserRoute,
+} as any)
+
+const UserQuizzesQuizIdRoute = UserQuizzesQuizIdImport.update({
+  path: '/quizzes/$quizId',
+  getParentRoute: () => UserRoute,
+} as any)
+
 // Populate the FileRoutesByPath interface
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/': {
-      preLoaderRoute: typeof IndexImport
-      parentRoute: typeof rootRoute
-    }
     '/_user': {
       preLoaderRoute: typeof UserImport
+      parentRoute: typeof rootRoute
+    }
+    '/create': {
+      preLoaderRoute: typeof CreateImport
       parentRoute: typeof rootRoute
     }
     '/login': {
@@ -118,19 +130,29 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof UserIndexImport
       parentRoute: typeof UserImport
     }
+    '/_user/quizzes/$quizId': {
+      preLoaderRoute: typeof UserQuizzesQuizIdImport
+      parentRoute: typeof UserImport
+    }
+    '/_user/quizzes/': {
+      preLoaderRoute: typeof UserQuizzesIndexImport
+      parentRoute: typeof UserImport
+    }
   }
 }
 
 // Create and export the route tree
 
 export const routeTree = rootRoute.addChildren([
-  IndexRoute,
   UserRoute.addChildren([
     UserAdminRoute,
     UserItemsRoute,
     UserSettingsRoute,
     UserIndexRoute,
+    UserQuizzesQuizIdRoute,
+    UserQuizzesIndexRoute,
   ]),
+  CreateRoute,
   LoginRoute,
   RecoverPasswordRoute,
   ResetPasswordRoute,

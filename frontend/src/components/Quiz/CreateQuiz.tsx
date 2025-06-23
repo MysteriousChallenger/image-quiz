@@ -1,26 +1,34 @@
 import {
   Box,
   Button,
-  ButtonGroup,
   Circle,
-  CloseButton,
   Image,
-  Container,
   FileUpload,
-  Flex,
   Float,
-  For,
   Icon,
   Input,
-  Stack,
   Steps,
   useFileUploadContext,
+  Flex,
+  defineStyle,
+  Field,
 } from "@chakra-ui/react";
-import { LuFileImage, LuFileUp, LuTrash, LuUpload, LuX } from "react-icons/lu";
-import { InputGroup } from "../ui/input-group";
-import { useCallback, useLayoutEffect, useRef, useState } from "react";
+import { LuFileUp, LuTrash, LuUpload, LuX } from "react-icons/lu";
+import { useLayoutEffect, useRef, useState } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  ApiError,
+  Body_image_quizzes_create_quiz,
+  ImageQuizCreate,
+  ImageQuizzesCreateQuizData,
+  ImageQuizzesCreateQuizMetadataData,
+  ImageQuizzesService,
+} from "@/client";
+import { handleError } from "@/utils";
+import useCustomToast from "@/hooks/useCustomToast";
+import { redirect, useNavigate } from "@tanstack/react-router";
 
-function useWindowSize() {
+export function useWindowSize() {
   const [size, setSize] = useState([0, 0]);
 
   useLayoutEffect(() => {
@@ -42,28 +50,31 @@ const UploadImagePreview = () => {
   const files = fileUpload.acceptedFiles;
   if (files.length === 0) return null;
   return (
-    <FileUpload.ItemGroup>
-      {files.map((file) => (
-        <FileUpload.Item
-          position="relative"
-          w="auto"
-          boxSize="100%"
-          p="2"
-          file={file}
-          key={file.name}
-          justifyContent="center"
-        >
-          <FileUpload.ItemPreviewImage boxSize="100%" />
-          <Float placement="top-end">
-            <FileUpload.ItemDeleteTrigger boxSize="4">
-              <Circle size="5" bg="red" color="white">
-                <LuX />
-              </Circle>
-            </FileUpload.ItemDeleteTrigger>
-          </Float>
-        </FileUpload.Item>
-      ))}
-    </FileUpload.ItemGroup>
+    <>
+      <Box p={2}></Box>
+      <FileUpload.ItemGroup>
+        {files.map((file) => (
+          <FileUpload.Item
+            position="relative"
+            w="auto"
+            boxSize="100%"
+            p="2"
+            file={file}
+            key={file.name}
+            justifyContent="center"
+          >
+            <FileUpload.ItemPreviewImage boxSize="100%" />
+            <Float placement="top-end">
+              <FileUpload.ItemDeleteTrigger boxSize="4">
+                <Circle size="5" bg="red">
+                  <LuX color="black" />
+                </Circle>
+              </FileUpload.ItemDeleteTrigger>
+            </Float>
+          </FileUpload.Item>
+        ))}
+      </FileUpload.ItemGroup>
+    </>
   );
 };
 
@@ -77,6 +88,7 @@ const UploadImageButton = ({
 
   function onClickUpload() {
     if (files.length > 0) {
+      console.log(files[0].name);
       handleUpload(files[0]);
     }
   }
@@ -101,19 +113,31 @@ const UploadQuizImage = ({
   return (
     <>
       <FileUpload.Root alignItems="stretch" maxFiles={1} accept="image/*">
-        <FileUpload.HiddenInput />
-        <FileUpload.Dropzone>
-          <Icon size="md" color="fg.muted">
-            <LuUpload />
-          </Icon>
-          <FileUpload.DropzoneContent>
-            <Box>Click to upload or Drag and drop files here</Box>
-            {/* <Box color="fg.muted">.png, .jpg up to 5MB</Box> */}
-          </FileUpload.DropzoneContent>
-        </FileUpload.Dropzone>
-
-        <UploadImagePreview />
-        <UploadImageButton handleUpload={handleUpload} />
+        <Flex justify="center" gap={4}>
+          <Box
+            width="60%"
+            minWidth="content-box"
+            borderWidth="1px"
+            borderColor="gray.200"
+            borderRadius="md"
+            p={4}
+          >
+            <FileUpload.HiddenInput />
+            <FileUpload.Dropzone>
+              <Icon size="md" color="fg.muted">
+                <LuUpload />
+              </Icon>
+              <FileUpload.DropzoneContent>
+                <Box>Click to upload or Drag and drop files here</Box>
+                {/* <Box color="fg.muted">.png, .jpg up to 5MB</Box> */}
+              </FileUpload.DropzoneContent>
+            </FileUpload.Dropzone>
+            <UploadImagePreview />
+          </Box>
+          <Box position="sticky" top="0px" alignSelf="flex-start">
+            <UploadImageButton handleUpload={handleUpload} />
+          </Box>
+        </Flex>
       </FileUpload.Root>
     </>
   );
@@ -152,6 +176,7 @@ const QuizQuestionDialog = ({
       <Input
         placeholder="Type Question Here"
         width="15em"
+        color={"black"}
         onChange={(e) => {
           setQuestionLabel(e.target.value);
         }}
@@ -196,6 +221,7 @@ const QuizQuestion = ({
 
   return (
     <Circle
+      zIndex={question.isDialogOpen ? 1000 : 0}
       position="absolute"
       left={`${x}px`}
       top={`${y}px`}
@@ -207,7 +233,15 @@ const QuizQuestion = ({
       onClick={handleClick}
     >
       <Float placement="top-center">
-        <Box position="relative" top={-10} backgroundColor="gray.100" borderRadius="md" opacity="0.8">
+        <Box
+          position="relative"
+          top={-10}
+          backgroundColor="gray.100"
+          borderRadius="md"
+          borderWidth={question.isDialogOpen ? "1px" : "0px"}
+          borderColor="gray.300"
+          opacity="0.9"
+        >
           <QuizQuestionDialog
             question={question}
             isOpen={question.isDialogOpen}
@@ -220,9 +254,58 @@ const QuizQuestion = ({
   );
 };
 
+const floatingStyles = defineStyle({
+  pos: "absolute",
+  bg: "bg",
+  px: "0.5",
+  top: "-3",
+  insetStart: "2",
+  fontWeight: "normal",
+  pointerEvents: "none",
+  transition: "position",
+  _peerPlaceholderShown: {
+    color: "fg.muted",
+    top: "2.5",
+    insetStart: "3",
+  },
+  _peerFocusVisible: {
+    color: "fg",
+    top: "-3",
+    insetStart: "2",
+  },
+});
+
 const CreateQuizQuestions = ({ quizImage }: { quizImage: File | null }) => {
+  const queryClient = useQueryClient();
+  const navigate = useNavigate();
+  const { showSuccessToast } = useCustomToast();
+  const mutation = useMutation({
+    mutationFn: (data: [ImageQuizCreate, Blob | File]) => {
+      return ImageQuizzesService.createQuizMetadata({
+        requestBody: data[0],
+      }).then((token) => {
+        return ImageQuizzesService.createQuiz({
+          formData: {
+            token,
+            file: data[1],
+          },
+        });
+      });
+    },
+    onSuccess: (data) => {
+      showSuccessToast("Quiz created successfully.");
+      navigate({ to: `/quizzes/${data.id}` });
+    },
+    onError: (err: ApiError) => {
+      handleError(err);
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["quizzes"] });
+    },
+  });
   const boxRef = useRef<HTMLElement>(null);
   const [questions, setQuestions] = useState<QuestionState[]>([]);
+  const [title, setTitle] = useState<string>("");
 
   function handleCreateQuestion(e: React.MouseEvent<HTMLDivElement>) {
     if (!boxRef.current) return;
@@ -261,39 +344,78 @@ const CreateQuizQuestions = ({ quizImage }: { quizImage: File | null }) => {
     setQuestions(questions.filter((_, i) => i !== index));
   }
 
+  function handleSubmit() {
+    if (quizImage == null) {
+      throw new Error("quizImage is null");
+    }
+    mutation.mutate([
+      {
+        title,
+        questions: questions.map((q) => {
+          return { label: q.label, x: q.position.x, y: q.position.y };
+        }),
+      },
+      quizImage,
+    ]);
+  }
+
   if (!quizImage) {
     return <Box>Please upload an image first.</Box>;
   }
 
   return (
     <>
-      <Box
-        width="60%"
-        margin="auto"
-        minWidth="content-box"
-        borderWidth="1px"
-        borderColor="gray.200"
-        borderRadius="md"
-        p={4}
-      >
-        <Box onClick={handleCreateQuestion} ref={boxRef}>
-          {questions.map((question, index) => (
-            <QuizQuestion
-              key={index}
-              question={question}
-              anchor={boxRef.current!}
-              setIsDialogOpen={(isDialogOpen) => {
-                handleDialogOpenChange(isDialogOpen, index);
-              }}
-              setQuestionLabel={(label) => {
-                handleQuestionLabelChange(label, index);
-              }}
-              deleteQuestion={() => handleDeleteQuestion(index)}
+      <Flex justify="center" gap={4}>
+        <Box
+          width="60%"
+          minWidth="content-box"
+          borderWidth="1px"
+          borderColor="gray.200"
+          borderRadius="md"
+          p={4}
+          display="flex"
+          flexDirection="column"
+          gap={4}
+        >
+          <Flex gap={4}>
+            <Field.Root>
+              <Input
+                className="peer"
+                placeholder=""
+                value={title}
+                onChange={(e) => {
+                  setTitle(e.target.value);
+                }}
+              />
+              <Field.Label css={floatingStyles}>Quiz Name</Field.Label>
+            </Field.Root>
+
+            <Box position="sticky" top="0px" alignSelf="flex-start">
+              <Button onClick={handleSubmit}>Submit</Button>
+            </Box>
+          </Flex>
+          <Box onClick={handleCreateQuestion} ref={boxRef}>
+            {questions.map((question, index) => (
+              <QuizQuestion
+                key={index}
+                question={question}
+                anchor={boxRef.current!}
+                setIsDialogOpen={(isDialogOpen) => {
+                  handleDialogOpenChange(isDialogOpen, index);
+                }}
+                setQuestionLabel={(label) => {
+                  handleQuestionLabelChange(label, index);
+                }}
+                deleteQuestion={() => handleDeleteQuestion(index)}
+              />
+            ))}
+            <Image
+              src={URL.createObjectURL(quizImage)}
+              alt="Placeholder Image"
             />
-          ))}
-          <Image src={URL.createObjectURL(quizImage)} alt="Placeholder Image" />
+          </Box>
         </Box>
-      </Box>
+      </Flex>
     </>
   );
 };
@@ -317,12 +439,6 @@ const CreateQuiz = () => {
       content: CreateQuizQuestions({ quizImage: quizImage! }),
     },
   ];
-
-  const submitButton = (
-    <Button>
-      submit
-    </Button>
-  )
 
   return (
     <Box borderWidth="1px" borderColor="gray.200" borderRadius="md" p={4}>
@@ -351,7 +467,6 @@ const CreateQuiz = () => {
         ))}
         <Steps.CompletedContent>All steps are complete!</Steps.CompletedContent>
       </Steps.Root>
-      { step == steps.length - 1 ? submitButton : null }
     </Box>
   );
 };
