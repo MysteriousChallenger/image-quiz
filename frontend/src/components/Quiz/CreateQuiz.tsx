@@ -45,28 +45,30 @@ const UploadImagePreview = () => {
   return (
     <>
       <Box p={2}></Box>
-      <FileUpload.ItemGroup>
-        {files.map((file) => (
-          <FileUpload.Item
-            position="relative"
-            w="auto"
-            boxSize="100%"
-            p="2"
-            file={file}
-            key={file.name}
-            justifyContent="center"
-          >
-            <FileUpload.ItemPreviewImage boxSize="100%" />
-            <Float placement="top-end">
-              <FileUpload.ItemDeleteTrigger boxSize="4">
-                <Circle size="5" bg="red">
-                  <LuX color="black" />
-                </Circle>
-              </FileUpload.ItemDeleteTrigger>
-            </Float>
-          </FileUpload.Item>
-        ))}
-      </FileUpload.ItemGroup>
+      <Flex
+        justifyContent="center">
+        <FileUpload.ItemGroup w="fit-content" height="fit-content">
+          {files.map((file) => (
+            <FileUpload.Item
+              position="relative"
+              p="2"
+              file={file}
+              key={file.name}
+              w="fit-content"
+            >
+              <FileUpload.ItemPreviewImage objectFit="contain" minW="40vw" minH="calc(80vh - 400px)" />
+              <Float placement="top-end">
+                <FileUpload.ItemDeleteTrigger boxSize="4">
+                  <Circle size="5" bg="red">
+                    <LuX color="black" />
+                  </Circle>
+                </FileUpload.ItemDeleteTrigger>
+              </Float>
+            </FileUpload.Item>
+          ))}
+        </FileUpload.ItemGroup>
+
+      </Flex>
     </>
   );
 };
@@ -108,7 +110,7 @@ const UploadQuizImage = ({
       <FileUpload.Root alignItems="stretch" maxFiles={1} accept="image/*">
         <Flex justify="center" gap={4}>
           <Box
-            width="60%"
+            width="calc(60vw + 100px)"
             minWidth="content-box"
             borderWidth="1px"
             borderColor="gray.200"
@@ -194,7 +196,7 @@ const QuizQuestion = ({
   deleteQuestion,
 }: {
   question: QuestionState;
-  anchor: HTMLElement;
+  anchor: HTMLImageElement;
   setIsDialogOpen: (isDialogOpen: boolean) => void;
   setQuestionLabel: (label: string) => void;
   deleteQuestion: () => void;
@@ -203,8 +205,11 @@ const QuizQuestion = ({
 
   const { position, label } = question;
   const rect = anchor.getBoundingClientRect();
-  const x = rect.left + position.x * rect.width;
-  const y = rect.top + position.y * rect.height;
+  const aspect_ratio = anchor.naturalWidth / anchor.naturalHeight
+  const display_width = Math.min(rect.width, rect.height * aspect_ratio)
+  const display_height = Math.min(rect.height, rect.width / aspect_ratio)
+  const x = position.x * display_width + ((rect.width - display_width) / 2);
+  const y = position.y * display_height + ((rect.height - display_height) / 2);
 
   const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
     e.stopPropagation();
@@ -297,7 +302,7 @@ const CreateQuizQuestions = ({ quizImage }: { quizImage: File | null }) => {
       queryClient.invalidateQueries({ queryKey: ["quizzes"] });
     },
   });
-  const boxRef = useRef<HTMLElement>(null);
+  const boxRef = useRef<HTMLImageElement>(null);
   const [questions, setQuestions] = useState<QuestionState[]>([]);
   const [title, setTitle] = useState<string>("");
 
@@ -361,8 +366,7 @@ const CreateQuizQuestions = ({ quizImage }: { quizImage: File | null }) => {
     <>
       <Flex justify="center" gap={4}>
         <Box
-          width="60%"
-          minWidth="content-box"
+          width="calc(60vw + 100px)"
           borderWidth="1px"
           borderColor="gray.200"
           borderRadius="md"
@@ -388,26 +392,37 @@ const CreateQuizQuestions = ({ quizImage }: { quizImage: File | null }) => {
               <Button onClick={handleSubmit}>Submit</Button>
             </Box>
           </Flex>
-          <Box onClick={handleCreateQuestion} ref={boxRef}>
-            {questions.map((question, index) => (
-              <QuizQuestion
-                key={index}
-                question={question}
-                anchor={boxRef.current!}
-                setIsDialogOpen={(isDialogOpen) => {
-                  handleDialogOpenChange(isDialogOpen, index);
-                }}
-                setQuestionLabel={(label) => {
-                  handleQuestionLabelChange(label, index);
-                }}
-                deleteQuestion={() => handleDeleteQuestion(index)}
+          <Flex
+            backgroundColor="gray.100"
+            justifyContent="center"
+            display="flex">
+            <Box onClick={handleCreateQuestion}
+              h="fit-content" w="fit-content"
+              position="relative"
+            >
+              {questions.map((question, index) => (
+                <QuizQuestion
+                  key={index}
+                  question={question}
+                  anchor={boxRef.current!}
+                  setIsDialogOpen={(isDialogOpen) => {
+                    handleDialogOpenChange(isDialogOpen, index);
+                  }}
+                  setQuestionLabel={(label) => {
+                    handleQuestionLabelChange(label, index);
+                  }}
+                  deleteQuestion={() => handleDeleteQuestion(index)}
+                />
+              ))}
+              <Image
+                ref={boxRef}
+                objectFit="contain" h="calc(80vh - 200px)"
+                src={URL.createObjectURL(quizImage)}
+                alt="Placeholder Image"
               />
-            ))}
-            <Image
-              src={URL.createObjectURL(quizImage)}
-              alt="Placeholder Image"
-            />
-          </Box>
+            </Box>
+
+          </Flex>
         </Box>
       </Flex>
     </>

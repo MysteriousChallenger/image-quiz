@@ -154,7 +154,7 @@ const QuizQuestion = ({
   onClick,
 }: {
   question: QuestionState;
-  anchor: HTMLElement | null;
+  anchor: HTMLImageElement | null;
   onClick: (question: QuestionState) => void;
 }) => {
   if (!anchor) {
@@ -164,8 +164,11 @@ const QuizQuestion = ({
   const [_height, _width] = useWindowSize();
   const { position, label } = question;
   const rect = anchor.getBoundingClientRect();
-  const x = position.x * rect.width;
-  const y = position.y * rect.height;
+  const aspect_ratio = anchor.naturalWidth / anchor.naturalHeight
+  const display_width = Math.min(rect.width, rect.height * aspect_ratio)
+  const display_height = Math.min(rect.height, rect.width / aspect_ratio)
+  const x = position.x * display_width + ((rect.width - display_width) / 2);
+  const y = position.y * display_height + ((rect.height - display_height) / 2);
 
   const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
     e.stopPropagation();
@@ -220,7 +223,7 @@ function readQuizImageQuery({ id }: { id: string }) {
 }
 
 const PlayQuiz = ({ quizId: id }: { quizId: string }) => {
-  const boxRef = useRef<HTMLElement>(null);
+  const boxRef = useRef<HTMLImageElement>(null);
   const { data: quizData, isSuccess: getQuizSuccess } = useQuery({
     ...readQuizQuery({ id }),
     placeholderData: (prevData) => prevData,
@@ -292,7 +295,7 @@ const PlayQuiz = ({ quizId: id }: { quizId: string }) => {
         {quiz?.title ?? ""}
       </Heading>
       <Box
-        width="60%"
+        width="calc(60vw + 100px)"
         margin="auto"
         minWidth="content-box"
         borderWidth="1px"
@@ -310,10 +313,11 @@ const PlayQuiz = ({ quizId: id }: { quizId: string }) => {
           onRestart={handleRestart}
         />
         <Box padding={2}></Box>
-        <Box p={4} backgroundColor="gray.100">
-          <Box ref={boxRef} width={"content-box"} position="relative">
-            {drawQuizQuestions
-              ? quiz?.questions.map((question, index) => (
+        <Flex p={4} backgroundColor="gray.100" justify="center">
+          <Flex backgroundColor="gray.100" justify="center" flexDirection="column">
+            <Box position="relative" h="fit-content" w="fit-content">
+              {drawQuizQuestions
+                ? quiz?.questions.map((question, index) => (
                   <QuizQuestion
                     key={index}
                     question={{
@@ -324,14 +328,17 @@ const PlayQuiz = ({ quizId: id }: { quizId: string }) => {
                     onClick={handleClick}
                   />
                 ))
-              : null}
-            <Image
-              src={data}
-              alt="Placeholder Image"
-              onLoad={handleImageLoad}
-            />
-          </Box>
-        </Box>
+                : null}
+              <Image
+                ref={boxRef}
+                objectFit="contain" h="calc(80vh - 200px)"
+                src={data}
+                alt="Placeholder Image"
+                onLoad={handleImageLoad}
+              />
+            </Box>
+          </Flex>
+        </Flex>
       </Box>
     </>
   );
