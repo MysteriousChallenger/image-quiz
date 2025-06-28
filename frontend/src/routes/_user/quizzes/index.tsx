@@ -57,10 +57,7 @@ function QuizTable() {
   const setPage = (page: number) => {
     navigate({
       // @ts-ignore
-      search: (prev: { [key: string]: string }) => ({
-        ...prev,
-        page: String(page),
-      }),
+      search: (prev: { [key: string]: string }) => ({ ...prev, page }),
     });
   };
 
