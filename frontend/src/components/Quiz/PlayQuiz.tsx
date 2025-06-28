@@ -57,7 +57,7 @@ const Timer = ({
   const minutes = String(time2).padStart(2, "0");
 
   return (
-    <Box>
+    <Box onClick={() => { setTime(time + CLOCK_INTERVAL); }} fontFamily="'Courier New'  , Courier, monospace;" textAlign="center">
       {minutes}:{seconds}
     </Box>
   );
